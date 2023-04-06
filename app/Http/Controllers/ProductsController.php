@@ -6,8 +6,6 @@ use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -20,7 +18,7 @@ class ProductsController extends Controller
     {
         //
         $products= QueryBuilder::for(Product::class)
-        ->allowedFields('id','name','media.id','media.file_name')
+        ->allowedFields(['id','name','media.id','media.file_name'])
         ->allowedFilters(['name'])
         ->allowedSorts(['name'])
         ->allowedIncludes(['media'])
@@ -53,7 +51,13 @@ class ProductsController extends Controller
      */
     public function show(Product $product)
     {
-        //
+        $product_f= QueryBuilder::for(Product::class)
+        ->allowedFields('id','name','media.id','media.file_name')
+        ->allowedIncludes(['media'])
+        ->where('id',$product->id)
+        ->first()
+        ;
+       return new ProductResource($product_f);
     }
 
     /**
@@ -61,7 +65,17 @@ class ProductsController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $product->update([
+            'name'=>$request->name
+        ]);
+
+        if ($request->has('images')) {
+            foreach ($request->file('images') as $image) {
+                $product->addMedia($image)->toMediaCollection();
+            }
+        }
+
+        return new ProductResource($product);
     }
 
     /**
@@ -69,6 +83,6 @@ class ProductsController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        $product->delete();
     }
 }

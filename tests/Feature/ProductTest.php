@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class ProductTest extends TestCase
@@ -15,6 +15,10 @@ class ProductTest extends TestCase
      */
     public function test_post(): void
     {
+        Sanctum::actingAs(
+            User::find(1)
+        );
+
         $response = $this->postJson('/api/products', ['name' => 'Pera']);
         $response->assertStatus(201);
         $response = $this->postJson('/api/products', ['name' => 'Naranja']);
@@ -23,6 +27,9 @@ class ProductTest extends TestCase
 
     public function test_get(): void
     {
+        Sanctum::actingAs(
+            User::find(1)
+        );
         $response = $this->getJson('/api/products');
         $response->assertJson(fn(AssertableJson $json)=>$json->has('data')->etc());
         $response->assertJson(
@@ -34,6 +41,9 @@ class ProductTest extends TestCase
 
     public function test_post_with_images(): void
     {
+        Sanctum::actingAs(
+            User::find(1)
+        );
         $response = $this->postJson('/api/products', [
             'name' => 'Tomate',
             'images'=> [
@@ -46,10 +56,10 @@ class ProductTest extends TestCase
         $response->assertJson(fn(AssertableJson $json)=>$json->has('data')->etc());
         $response->assertJson(fn(AssertableJson $json)=>
             $json->has('data.0',fn (AssertableJson $json) =>
-                $json->has('images.0',fn (AssertableJson $json) =>
+                $json->has('media.0',fn (AssertableJson $json) =>
                     $json->where('file_name','tomate1.jpg')->etc()
                 )
-                ->has('images.1',fn (AssertableJson $json) =>
+                ->has('media.1',fn (AssertableJson $json) =>
                     $json->where('file_name','tomate2.jpg')->etc()
                 )
                 ->etc()
@@ -59,4 +69,55 @@ class ProductTest extends TestCase
 
 
     }
+
+    public function test_get_one(): void
+    {
+        Sanctum::actingAs(
+            User::find(1)
+        );
+        $response = $this->getJson('/api/products/1?fields[products]=id,name');
+
+        $response->assertJson(fn(AssertableJson $json)=>
+            $json->has('data',fn (AssertableJson $json) =>
+                $json->where('id',1)->has('name')
+            )
+        );
+    }
+
+    public function test_update(): void
+    {
+        Sanctum::actingAs(
+            User::find(1)
+        );
+        $response = $this->putJson('/api/products/1', [
+            'name' => 'Kiwi',
+            'images'=> [
+                UploadedFile::fake()->image('kiwi1.jpg')->size(300),
+            ],
+        ]);
+
+        $response = $this->getJson('/api/products?filter[name]=Kiwi&include=media');
+        $response->assertJson(fn(AssertableJson $json)=>$json->has('data')->etc());
+        $response->assertJson(fn(AssertableJson $json)=>
+            $json->has('data.0',fn (AssertableJson $json) =>
+                $json->has('media.0',fn (AssertableJson $json) =>
+                    $json->where('file_name','kiwi1.jpg')->etc()
+                )
+                ->etc()
+            )->etc()
+
+        );
+    }
+
+    public function test_delete(): void
+    {
+        Sanctum::actingAs(
+            User::find(1)
+        );
+        $response = $this->deleteJson('/api/products/1', [
+        ]);
+
+        $response->assertStatus(200);
+    }
+
 }
