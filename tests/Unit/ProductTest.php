@@ -113,7 +113,7 @@ class ProductTest extends TestCase
     public function test_update(): void
     {
         Sanctum::actingAs(
-            User::find(1)
+            User::find(2)//Moderador
         );
         $response = $this->putJson('/api/products/1', [
             'name' => 'Kiwi',
@@ -141,6 +141,16 @@ class ProductTest extends TestCase
         );
     }
 
+    public function test_permission_delete(): void
+    {
+        Sanctum::actingAs(
+            User::find(3)//Comercial
+        );
+        $response = $this->deleteJson('/api/products/1', [
+        ]);
+        $response->assertStatus(403);//forbidden
+    }
+
     public function test_delete(): void
     {
         Sanctum::actingAs(
@@ -149,6 +159,15 @@ class ProductTest extends TestCase
         $response = $this->deleteJson('/api/products/1', [
         ]);
 
+        $response->assertStatus(200);
+    }
+
+    public function test_delete_image(): void{
+        Sanctum::actingAs(
+            User::find(1)
+        );
+        $response = $this->deleteJson('/api/medias/1', [
+        ]);
         $response->assertStatus(200);
     }
 

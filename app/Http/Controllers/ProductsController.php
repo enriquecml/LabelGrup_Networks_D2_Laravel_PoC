@@ -7,6 +7,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ProductsController extends Controller
@@ -99,4 +100,5 @@ class ProductsController extends Controller
     {
         $product->delete();
     }
+
 }
