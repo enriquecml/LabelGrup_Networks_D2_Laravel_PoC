@@ -12,4 +12,11 @@ class Product extends Model implements HasMedia
     use HasFactory;
     use InteractsWithMedia;
     protected $fillable=['name'];
+
+
+    public  function categories()
+    {
+        return $this->belongsToMany(Category::class,ProductCategory::class);
+    }
+
 }
