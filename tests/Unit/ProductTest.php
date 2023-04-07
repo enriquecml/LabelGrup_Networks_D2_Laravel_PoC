@@ -25,6 +25,32 @@ class ProductTest extends TestCase
         $response->assertStatus(201);
     }
 
+        /**
+     * A basic feature test example.
+     */
+    public function test_post_with_categories(): void
+    {
+        Sanctum::actingAs(
+            User::find(1)
+        );
+
+        $response = $this->postJson('/api/products', [
+            'name' => 'Lima',
+            'categories'=>[
+                [
+                    'category_id'=>1,
+                    'main'=>true
+                ],
+                [
+                    'category_id'=>3,
+                    'main'=>false
+                ],
+            ]
+        ]);
+        $response->assertStatus(201);
+
+    }
+
     public function test_get(): void
     {
         Sanctum::actingAs(
@@ -94,6 +120,12 @@ class ProductTest extends TestCase
             'images'=> [
                 UploadedFile::fake()->image('kiwi1.jpg')->size(300),
             ],
+            'categories'=>[
+                [
+                    'category_id'=>3,
+                    'main'=>true
+                ],
+            ]
         ]);
 
         $response = $this->getJson('/api/products?filter[name]=Kiwi&include=media');

@@ -12,6 +12,13 @@ use Illuminate\Http\Response;
 
 class CategoriesController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware(['role:admin'])->only(['store','destroy']);
+        $this->middleware(['role:admin|moderator'])->only('update');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -45,7 +52,8 @@ class CategoriesController extends Controller
     public function show(Category $category)
     {
         $category_f= QueryBuilder::for(Category::class)
-        ->allowedFields('id','name')
+        ->allowedFields('id','name','products.name')
+        ->allowedIncludes(['products'])
         ->where('id',$category->id)
         ->first()
         ;

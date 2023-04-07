@@ -11,6 +11,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ProductsController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware(['role:admin'])->only(['store','destroy']);
+        $this->middleware(['role:admin|moderator'])->only('update');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -40,6 +46,10 @@ class ProductsController extends Controller
             foreach ($request->file('images') as $image) {
                 $product->addMedia($image)->toMediaCollection();
             }
+        }
+
+        if($request->has('categories')){
+            $product->categories()->sync($request->categories);
         }
 
         return (new ProductResource($product))->response()
@@ -73,6 +83,10 @@ class ProductsController extends Controller
             foreach ($request->file('images') as $image) {
                 $product->addMedia($image)->toMediaCollection();
             }
+        }
+
+        if($request->has('categories')){
+            $product->categories()->sync($request->categories);
         }
 
         return new ProductResource($product);

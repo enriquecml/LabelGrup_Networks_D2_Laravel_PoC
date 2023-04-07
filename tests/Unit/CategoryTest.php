@@ -23,6 +23,8 @@ class CategoryTest extends TestCase
         $response->assertStatus(201);
         $response = $this->postJson('/api/categories', ['name' => 'Hortalizas']);
         $response->assertStatus(201);
+        $response = $this->postJson('/api/categories', ['name' => 'Cítricos']);
+        $response->assertStatus(201);
     }
 
     public function test_get(): void
@@ -45,7 +47,6 @@ class CategoryTest extends TestCase
             User::find(1)
         );
         $response = $this->getJson('/api/categories/1?fields[categories]=id,name');
-
         $response->assertJson(fn(AssertableJson $json)=>
             $json->has('data',fn (AssertableJson $json) =>
                 $json->where('id',1)->has('name')

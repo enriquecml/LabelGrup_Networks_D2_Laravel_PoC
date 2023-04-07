@@ -31,5 +31,28 @@ class DatabaseSeeder extends Seeder
             'name'=>'admin'
         ]);
         $admin->assignRole($rol_admin);
+
+        $moderator=User::create([
+            'name'=>'Moderator',
+            'email'=>'moderator@moderator.prueba',
+            'password'=>Str::random(10)
+        ]);
+
+        $rol_moderator=Role::create([
+            'name'=>'moderator'
+        ]);
+        $moderator->assignRole($rol_moderator);
+
+        $commercial=User::create([
+            'name'=>'Commercial',
+            'email'=>'commercial@commercial.prueba',
+            'password'=>Str::random(10)
+        ]);
+
+        $rol_commercial=Role::create([
+            'name'=>'commercial'
+        ]);
+        $commercial->assignRole($rol_commercial);
+
     }
 }
